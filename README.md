@@ -1,5 +1,7 @@
 # zod-to-vertex-schema
 
+[![npm version](https://badge.fury.io/js/@techery%2Fzod-to-vertex-schema.svg)](https://www.npmjs.com/package/@techery/zod-to-vertex-schema)
+
 Convert [Zod](https://github.com/colinhacks/zod) schemas to [Vertex AI/Gemini](https://cloud.google.com/vertex-ai) compatible schemas. This library helps you define your Vertex AI/Gemini function parameters using Zod's powerful schema definition system.
 
 Developed by [Techery](https://techery.io).
