@@ -1,1 +1,1 @@
-export { zodToVertexSchema as zodToGeminiSchema } from './zod-to-vertex-schema';
+export { zodToVertexSchema, zodDynamicEnum } from './zod-to-vertex-schema';
