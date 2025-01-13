@@ -2,7 +2,7 @@
 
 Convert [Zod](https://github.com/colinhacks/zod) schemas to [Vertex AI/Gemini](https://cloud.google.com/vertex-ai) compatible schemas. This library helps you define your Vertex AI/Gemini function parameters using Zod's powerful schema definition system.
 
-Developed by [Serge Zenchenko](https://github.com/sergeyzenchenko) at [Techery](https://techery.io).
+Developed by [Techery](https://techery.io).
 
 ## Type Compatibility
 
@@ -321,8 +321,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Authors
 
-- [Serge Zenchenko](https://github.com/sergez) - Principal Engineer at [Techery](https://techery.io)
+- [Serge Zenchenko](https://github.com/sergezenchenko) - CTO at [Techery](https://techery.io)
 
 ## License
 
-MIT © [Serge Zenchenko](https://github.com/sergez) / [Techery](https://techery.io) 
+MIT
