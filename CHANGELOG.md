@@ -35,3 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Recursive schemas (using `z.lazy()`) are not supported due to Vertex AI schema limitations
 - Non-string literals are not supported in this version
 - Default values are intentionally ignored in schema conversion 
+
+
+## [0.1.2] - 2025-01-13
+
+### Added
+- Fix imports
