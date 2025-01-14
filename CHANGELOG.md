@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2024-03-XX
+## [0.1.3] - 2024-03-XX
+
+### Added
+- `vertexSchemaToZod` function for converting Vertex AI schemas back to Zod schemas
+- Two-way conversion support between Zod and Vertex AI schemas
+- Improved documentation with examples for both conversion directions
+
+## [0.1.2] - 2024-03-13
+
+### Fixed
+- Fixed imports and package structure
+
+## [0.1.0] - 2024-03-12
 
 ### Added
 - Initial release of `zod-to-vertex-schema`

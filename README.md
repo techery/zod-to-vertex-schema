@@ -3,9 +3,15 @@
 [![npm version](https://badge.fury.io/js/@techery%2Fzod-to-vertex-schema.svg)](https://www.npmjs.com/package/@techery/zod-to-vertex-schema)
 ![CI Status](https://github.com/techery/zod-to-vertex-schema/actions/workflows/pr-checks.yml/badge.svg?branch=main)
 
-Convert [Zod](https://github.com/colinhacks/zod) schemas to [Vertex AI/Gemini](https://cloud.google.com/vertex-ai) compatible schemas. This library helps you define your Vertex AI/Gemini function parameters using Zod's powerful schema definition system.
+Convert [Zod](https://github.com/colinhacks/zod) schemas to [Vertex AI/Gemini](https://cloud.google.com/vertex-ai) compatible schemas and back. This library helps you define your Vertex AI/Gemini function parameters using Zod's powerful schema definition system.
 
 Developed by [Techery](https://techery.io).
+
+## Features
+- Two-way conversion between Zod and Vertex AI schemas
+- Preserves property ordering and descriptions
+- Full TypeScript support
+- Zero dependencies (except Zod)
 
 ## Type Compatibility
 
@@ -35,6 +41,61 @@ npm install zod-to-vertex-schema
 ```
 
 ## Usage
+
+### Converting Zod to Vertex AI Schema
+
+```typescript
+import { z } from 'zod';
+import { zodToVertexSchema } from 'zod-to-vertex-schema';
+
+// Define your Zod schema
+const userSchema = z.object({
+  name: z.string(),
+  age: z.number().int().min(0),
+  email: z.string().email(),
+  roles: z.array(z.enum(['admin', 'user'])),
+});
+
+// Convert to Vertex AI schema
+const vertexSchema = zodToVertexSchema(userSchema);
+```
+
+### Converting Vertex AI Schema to Zod
+
+```typescript
+import { vertexSchemaToZod } from 'zod-to-vertex-schema';
+import { SchemaType } from 'zod-to-vertex-schema';
+
+// Your Vertex AI schema
+const vertexSchema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    name: { type: SchemaType.STRING },
+    age: { type: SchemaType.INTEGER, minimum: 0 },
+    email: { type: SchemaType.STRING },
+    roles: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING, enum: ["admin", "user"] }
+    }
+  },
+  required: ["name", "age", "email", "roles"],
+  propertyOrdering: ["name", "age", "email", "roles"]
+};
+
+// Convert back to Zod schema
+const zodSchema = vertexSchemaToZod(vertexSchema);
+
+// Now you can use it for validation
+const validUser = {
+  name: "John",
+  age: 30,
+  email: "john@example.com",
+  roles: ["admin"]
+};
+
+const result = zodSchema.safeParse(validUser);
+console.log(result.success); // true
+```
 
 ### Basic Example
 
@@ -301,6 +362,10 @@ const vertexEventSchema = zodToVertexSchema(eventSchema);
 ### `zodToVertexSchema(schema: z.ZodTypeAny): VertexSchema`
 
 Converts any Zod schema into a Vertex AI/Gemini-compatible schema.
+
+### `vertexSchemaToZod(schema: VertexSchema): z.ZodTypeAny`
+
+Converts a Vertex AI/Gemini schema back into a Zod schema. Supports all features that are available in the Vertex AI schema format.
 
 ### `zodDynamicEnum(values: string[]): z.ZodEnum`
 
