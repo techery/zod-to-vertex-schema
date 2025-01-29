@@ -1,5 +1,62 @@
-import { z } from 'zod';
-import { SchemaType, VertexSchema } from './vertex-schema';
+import { z, ZodFirstPartyTypeKind } from 'zod';
+export enum SchemaType {
+  /** String type. */
+  STRING = 'STRING',
+  /** Number type. */
+  NUMBER = 'NUMBER',
+  /** Integer type. */
+  INTEGER = 'INTEGER',
+  /** Boolean type. */
+  BOOLEAN = 'BOOLEAN',
+  /** Array type. */
+  ARRAY = 'ARRAY',
+  /** Object type. */
+  OBJECT = 'OBJECT',
+}
+
+/**
+ * Schema is used to define the format of input/output data.
+ * Represents a select subset of an OpenAPI 3.0 schema object.
+ * More fields may be added in the future as needed.
+ */
+export interface VertexSchema {
+  /**
+   * Optional. The type of the property. {@link
+   * SchemaType}.
+   */
+  type?: SchemaType;
+  /** Optional. The format of the property. */
+  format?: string;
+  /** Optional. The description of the property. */
+  description?: string;
+  /** Optional. Whether the property is nullable. */
+  nullable?: boolean;
+  /** Optional. The items of the property. {@link Schema} */
+  items?: VertexSchema;
+  /** Optional. The enum of the property. */
+  enum?: string[];
+  /** Optional. Map of {@link Schema}. */
+  properties?: {
+    [k: string]: VertexSchema;
+  };
+  /** Optional. Array of required property. */
+  required?: string[];
+  /** Optional. The example of the property. */
+  example?: unknown;
+
+  /** Optional. Array of property names in the order they should be displayed. */
+  propertyOrdering?: string[];
+  /** Optional. Array of schemas that this schema can be any of. */
+  anyOf?: VertexSchema[];
+  /** Optional. Minimum number of items in an array. */
+  minItems?: number;
+  /** Optional. Maximum number of items in an array. */
+  maxItems?: number;
+  /** Optional. Minimum value for a number. */
+  minimum?: number;
+  /** Optional. Maximum value for a number. */
+  maximum?: number;
+}
 
 export function zodDynamicEnum(values: string[]) {
   return z.enum(values as [string, ...string[]]);
@@ -10,7 +67,7 @@ export function zodDynamicEnum(values: string[]) {
  * Defaults are intentionally ignored (not included in final schema).
  */
 export function zodToVertexSchema(schema: z.ZodTypeAny): VertexSchema {
-  const isZodNull = schema instanceof z.ZodNull;
+  const isZodNull = schema._def.typeName === ZodFirstPartyTypeKind.ZodNull;
 
   // 1) If schema is optional or nullable, unwrap it and mark "nullable" if appropriate.
   if (!isZodNull && (schema.isOptional() || schema.isNullable())) {
@@ -31,42 +88,42 @@ export function zodToVertexSchema(schema: z.ZodTypeAny): VertexSchema {
   }
 
   // 2) Dispatch based on known Zod constructors
-  if (schema instanceof z.ZodString) {
-    return makeStringSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodString) {
+    return makeStringSchema(schema as z.ZodString);
   }
 
-  if (schema instanceof z.ZodNumber) {
-    return makeNumberSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodNumber) {
+    return makeNumberSchema(schema as z.ZodNumber);
   }
 
-  if (schema instanceof z.ZodBoolean) {
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodBoolean) {
     return {
       type: SchemaType.BOOLEAN,
       description: schema.description,
     };
   }
 
-  if (schema instanceof z.ZodObject) {
-    return makeObjectSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodObject) {
+    return makeObjectSchema(schema as z.ZodObject<any>);
   }
 
-  if (schema instanceof z.ZodArray) {
-    return makeArraySchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodArray) {
+    return makeArraySchema(schema as z.ZodArray<any>);
   }
 
-  if (schema instanceof z.ZodEnum) {
-    return makeEnumSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodEnum) {
+    return makeEnumSchema(schema as z.ZodEnum<any>);
   }
 
-  if (schema instanceof z.ZodUnion) {
-    return makeUnionSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodUnion) {
+    return makeUnionSchema(schema as z.ZodUnion<any>);
   }
 
-  if (schema instanceof z.ZodLiteral) {
-    return makeLiteralSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodLiteral) {
+    return makeLiteralSchema(schema as z.ZodLiteral<any>);
   }
 
-  if (schema instanceof z.ZodNull) {
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodNull) {
     // No native "null" type in Gemini. Use type=STRING + nullable=true as a fallback.
     return {
       type: SchemaType.STRING,
@@ -75,8 +132,8 @@ export function zodToVertexSchema(schema: z.ZodTypeAny): VertexSchema {
     };
   }
 
-  if (schema instanceof z.ZodDiscriminatedUnion) {
-    return makeDiscriminatedUnionSchema(schema);
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodDiscriminatedUnion) {
+    return makeDiscriminatedUnionSchema(schema as z.ZodDiscriminatedUnion<string, any>);
   }
 
   throw new Error(`Unsupported Zod type: ${schema.constructor.name}`);
@@ -87,7 +144,7 @@ export function zodToVertexSchema(schema: z.ZodTypeAny): VertexSchema {
  * This way we can apply the relevant checks to the base type.
  */
 function unwrapOptionalOrNullable(schema: z.ZodTypeAny): z.ZodTypeAny {
-  if (schema instanceof z.ZodNull) {
+  if (schema._def.typeName === ZodFirstPartyTypeKind.ZodNull) {
     throw new Error('ZodNull is not supported');
   }
 
